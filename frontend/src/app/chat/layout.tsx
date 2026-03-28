@@ -1,5 +1,6 @@
 import type { Conversation } from "@/lib/types";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
+import { Suspense } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 

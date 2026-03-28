@@ -49,65 +49,62 @@ export function FileTree({ documents }: FileTreeProps) {
   };
 
   return (
-    <div className="w-64 border-r bg-muted/30 flex flex-col h-full">
-      <div className="p-3 border-b">
+    <div className="w-64 border-r bg-muted/30 flex flex-col h-full overflow-auto">
+      <div className="p-3">
         <h2 className="text-sm font-semibold">Documents</h2>
         <p className="text-xs text-muted-foreground mt-0.5">{documents.length} files</p>
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          {categories.map((cat) => {
-            const isExpanded = expanded.has(cat);
-            const docs = grouped[cat];
-            return (
-              <div key={cat} className="mb-1">
-                <button
-                  onClick={() => toggleCategory(cat)}
-                  className="flex items-center gap-1.5 w-full px-2 py-1.5 text-sm rounded-md hover:bg-accent/50 transition-colors"
-                >
-                  <ChevronRight
-                    className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${
-                      isExpanded ? "rotate-90" : ""
-                    }`}
-                  />
-                  {isExpanded ? (
-                    <FolderOpen className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <Folder className="w-4 h-4 text-muted-foreground" />
-                  )}
-                  <span className="font-medium">{categoryLabels[cat] || cat}</span>
-                  <span className="ml-auto text-xs text-muted-foreground">{docs.length}</span>
-                </button>
-                {isExpanded && (
-                  <div className="ml-3 pl-3 border-l border-border">
-                    {docs.map((doc) => {
-                      const Icon = fileIcons[doc.file_type] || File;
-                      const isSelected = pathname === `/docs/${doc.id}`;
-                      return (
-                        <Link
-                          key={doc.id}
-                          href={`/docs/${doc.id}`}
-                          className={`flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-md transition-colors ${
-                            isSelected
-                              ? "bg-accent text-accent-foreground"
-                              : "hover:bg-accent/50"
-                          }`}
-                        >
-                          <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                          <span className="truncate">{doc.filename}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
+      <div className="p-2">
+        {categories.map((cat) => {
+          const isExpanded = expanded.has(cat);
+          const docs = grouped[cat];
+          return (
+            <div key={cat} className="mb-1">
+              <button
+                onClick={() => toggleCategory(cat)}
+                className="flex items-center gap-1.5 w-full px-2 py-1.5 text-sm rounded-md hover:bg-accent/50 transition-colors"
+              >
+                <ChevronRight
+                  className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${
+                    isExpanded ? "rotate-90" : ""
+                  }`}
+                />
+                {isExpanded ? (
+                  <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <Folder className="w-4 h-4 text-muted-foreground" />
                 )}
-              </div>
-            );
-          })}
-          {documents.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">No documents yet</p>
-          )}
-        </div>
-      </ScrollArea>
+                <span className="font-medium">{categoryLabels[cat] || cat}</span>
+              </button>
+              {isExpanded && (
+                <div className="ml-3 pl-3 border-l border-border">
+                  {docs.map((doc) => {
+                    const Icon = fileIcons[doc.file_type] || File;
+                    const isSelected = pathname === `/docs/${doc.id}`;
+                    return (
+                      <Link
+                        key={doc.id}
+                        href={`/docs/${doc.id}`}
+                        className={`flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-md transition-colors ${
+                          isSelected
+                            ? "bg-accent text-accent-foreground"
+                            : "hover:bg-accent/50"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <span className="truncate">{doc.filename}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {documents.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-8">No documents yet</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export function DocumentDetail({ document }: DocumentDetailProps) {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b flex items-center gap-3">
+      <div className="p-3 border-b flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
           <Icon className="w-5 h-5 text-muted-foreground" />
         </div>

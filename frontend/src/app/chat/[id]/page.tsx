@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { getConversation } from "@/lib/api";
 import { ChatContent } from "../chat-content";
 import type { Message } from "@/lib/types";
@@ -21,8 +22,8 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-muted-foreground">
-        <p className="text-sm">Loading conversation...</p>
+      <div className="flex-1 flex flex-col items-center pt-12 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     );
   }

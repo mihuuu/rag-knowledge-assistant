@@ -58,7 +58,7 @@ export function ChatSidebar({ initialConversations }: ChatSidebarProps) {
   return (
     <div className="w-72 max-w-72 border-r bg-muted/30 flex flex-col h-full">
       <div className="p-3 border-b">
-        <Button asChild className="w-full" variant="outline" size="sm">
+        <Button asChild className="w-full" variant="outline">
           <Link href="/chat">
             <Plus className="w-4 h-4 mr-2" />
             New Chat

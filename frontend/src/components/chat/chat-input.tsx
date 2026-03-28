@@ -39,7 +39,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   return (
     <div className="border-t bg-background p-4">
-      <div className="flex gap-2 items-end max-w-3xl mx-auto">
+      <div className="flex gap-2 items-center max-w-3xl mx-auto">
         <textarea
           ref={textareaRef}
           placeholder="Ask a question about company documents..."
