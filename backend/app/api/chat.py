@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sse_starlette.sse import EventSourceResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.dependencies import get_redis
 from app.db.session import get_db
 from app.models.schemas import (
@@ -60,7 +61,7 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
         standalone_question = await condense_question(request.message, history[:-1])
 
         # Check cache
-        cached = await get_cached_response(redis, standalone_question)
+        cached = await get_cached_response(redis, standalone_question) if settings.cache_enabled else None
         if cached:
             # Stream cached response token by token (simulate streaming)
             for word in cached["response"].split(" "):
@@ -94,7 +95,8 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
         yield {"event": "sources", "data": json.dumps(sources)}
 
         # Cache the response
-        await set_cached_response(redis, standalone_question, full_response, sources)
+        if settings.cache_enabled:
+            await set_cached_response(redis, standalone_question, full_response, sources)
 
         # Save assistant message
         msg = await add_message(db, conversation_id, "assistant", full_response, sources)

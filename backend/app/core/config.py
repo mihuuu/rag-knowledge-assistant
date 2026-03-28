@@ -21,14 +21,20 @@ class Settings(BaseSettings):
     langsmith_api_key: str = ""
     langsmith_project: str = "rag-knowledge-assistant"
 
+    # Cohere
+    cohere_api_key: str = ""
+
     # RAG settings
     chunk_size: int = 512
     chunk_overlap: int = 102
     embedding_model: str = "text-embedding-3-small"
     llm_model: str = "gpt-4o-mini"
     retrieval_k: int = 5
+    rerank_model: str = "rerank-v3.5"
+    rerank_candidates: int = 20
 
     # Cache
+    cache_enabled: bool = False
     cache_ttl: int = 3600  # 1 hour
 
     model_config = {"env_file": ".env", "extra": "ignore"}

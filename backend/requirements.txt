@@ -6,6 +6,7 @@ langchain>=0.3
 langchain-openai>=0.3
 langchain-postgres>=0.0.12
 langchain-community>=0.3
+langchain-cohere>=0.4
 langchain-text-splitters>=0.3
 redis>=5.0
 pydantic>=2.0

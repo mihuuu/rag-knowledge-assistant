@@ -1,4 +1,8 @@
+import time
+
 import structlog
+from langchain_cohere import CohereRerank
+from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -70,9 +74,48 @@ async def condense_question(question: str, chat_history: list[Message]) -> str:
 def retrieve_documents(question: str, k: int | None = None) -> list:
     vector_store = get_vector_store()
     k = k or settings.retrieval_k
-    docs = vector_store.similarity_search_with_score(question, k=k)
-    logger.info("Retrieved documents", question=question[:50], count=len(docs))
-    return docs
+
+    if not settings.cohere_api_key:
+        logger.warning("No Cohere API key set, skipping rerank")
+        docs = vector_store.similarity_search_with_score(question, k=k)
+        logger.info("Retrieved docs", question=question[:50], count=len(docs))
+        return docs
+
+    # Over-fetch candidates for reranking
+    n = settings.rerank_candidates
+    candidates = vector_store.similarity_search_with_score(
+        question, k=n
+    )
+    logger.info("Retrieved candidates", question=question[:50], count=len(candidates))
+
+    # Rerank with Cohere
+    reranker = CohereRerank(
+        cohere_api_key=settings.cohere_api_key,
+        model=settings.rerank_model,
+        top_n=k,
+    )
+    docs_only = [doc for doc, _score in candidates]
+    for attempt in range(5):
+        try:
+            reranked = reranker.compress_documents(docs_only, query=question)
+            break
+        except Exception as e:
+            if "429" in str(e) and attempt < 4:
+                wait = 10 * (attempt + 1)
+                logger.warning("Cohere rate limited, retrying", wait=wait, attempt=attempt + 1)
+                time.sleep(wait)
+            else:
+                logger.error("Rerank failed, falling back to similarity order", error=str(e))
+                return candidates[:k]
+    logger.info("Reranked documents", count=len(reranked))
+
+    # Convert back to (Document, relevance_score) tuples
+    results = []
+    for rdoc in reranked:
+        score = rdoc.metadata.get("relevance_score", 0.0)
+        doc = Document(page_content=rdoc.page_content, metadata=rdoc.metadata)
+        results.append((doc, score))
+    return results
 
 
 def extract_sources(docs_with_scores: list) -> list[dict]:

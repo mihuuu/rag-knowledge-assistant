@@ -7,10 +7,10 @@ import structlog
 from ragas import evaluate
 from ragas.dataset_schema import EvaluationDataset, SingleTurnSample
 from ragas.metrics import (
+    ContextPrecision,
+    ContextRecall,
+    AnswerRelevancy,
     Faithfulness,
-    ResponseRelevancy,
-    LLMContextPrecisionWithoutReference,
-    LLMContextRecall,
 )
 from langchain_openai import ChatOpenAI
 
@@ -91,10 +91,10 @@ async def run_evaluation(dataset_path: str | None = None) -> dict:
     eval_dataset = EvaluationDataset(samples=samples)
 
     metrics = [
+        ContextPrecision(llm=llm),
+        ContextRecall(llm=llm),
+        AnswerRelevancy(llm=llm),
         Faithfulness(llm=llm),
-        ResponseRelevancy(llm=llm),
-        LLMContextPrecisionWithoutReference(llm=llm),
-        LLMContextRecall(llm=llm),
     ]
 
     logger.info("Running Ragas evaluation", num_questions=len(samples))
@@ -106,14 +106,14 @@ async def run_evaluation(dataset_path: str | None = None) -> dict:
     # Extract scores
     df = result.to_pandas()
     aggregate = {}
-    for metric in ["faithfulness", "answer_relevancy", "llm_context_precision_without_reference", "context_recall"]:
+    for metric in ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]:
         if metric in df.columns:
             aggregate[metric] = round(float(df[metric].mean()), 4)
 
     # Merge per-question scores
     for i, row in df.iterrows():
         scores = {}
-        for metric in ["faithfulness", "answer_relevancy", "llm_context_precision_without_reference", "context_recall"]:
+        for metric in ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]:
             if metric in df.columns:
                 scores[metric] = round(float(row[metric]), 4)
         per_question_results[i]["scores"] = scores
