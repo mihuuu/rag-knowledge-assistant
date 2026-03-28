@@ -1,0 +1,77 @@
+[
+  {
+    "question": "What is a VPN and why do I need it?",
+    "ground_truth": "A Virtual Private Network (VPN) is a secure way to connect to company systems when you are outside the office. It protects sensitive data by encrypting your internet traffic and ensures compliance with company security standards.",
+    "ground_truth_context": ["vpn-faq.md"]
+  },
+  {
+    "question": "When should I use the VPN?",
+    "ground_truth": "Anytime you are working remotely, accessing internal applications, or connecting over public Wi-Fi (cafes, airports, hotels).",
+    "ground_truth_context": ["vpn-faq.md"]
+  },
+  {
+    "question": "Can I use the VPN for personal browsing?",
+    "ground_truth": "No. The VPN is strictly for business-related activities. All traffic is monitored for security.",
+    "ground_truth_context": ["vpn-faq.md"]
+  },
+  {
+    "question": "Can I use the VPN on personal devices?",
+    "ground_truth": "Yes, provided the device meets company security requirements (updated OS, antivirus enabled, no jailbreaking/rooting).",
+    "ground_truth_context": ["vpn-faq.md"]
+  },
+  {
+    "question": "My VPN won't connect. What should I do?",
+    "ground_truth": "Check your internet connection, restart your device and VPN client, ensure correct credentials, and if the issue persists, contact the IT Helpdesk.",
+    "ground_truth_context": ["vpn-faq.md"]
+  },
+  {
+    "question": "What happens if I don't use the VPN?",
+    "ground_truth": "Access to internal systems may be blocked, and repeated violations may lead to disciplinary action.",
+    "ground_truth_context": ["vpn-faq.md"]
+  },
+  {
+    "question": "How far in advance should I book international travel?",
+    "ground_truth": "Employees are encouraged to book at least 30 days in advance for international travel.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "What is the per diem for domestic travel?",
+    "ground_truth": "The per diem allowance for domestic travel is 1,200 rupees per day. Receipts are required for claims.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "What is the per diem for international travel?",
+    "ground_truth": "The per diem allowance for international travel is US $60 per day. Receipts are required for claims.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "How long do I have to submit expense reports after travel?",
+    "ground_truth": "Expense reports should be submitted within 7 working days after travel ends.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "What expenses are not reimbursable during business travel?",
+    "ground_truth": "Personal entertainment, minibar charges, alcoholic beverages, and upgrades without prior approval.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "Can I combine business and personal travel?",
+    "ground_truth": "Yes, provided the personal portion is paid by the employee and clearly separated from business expenses.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "What hotel category should I book for business trips?",
+    "ground_truth": "Employees should book hotels in the 3- or 4-star category. Luxury hotels are not reimbursable unless approved for client meetings.",
+    "ground_truth_context": ["travel-faq.txt"]
+  },
+  {
+    "question": "How do I set up the VPN?",
+    "ground_truth": "1. Download client 2. Enter credentials 3. Connect",
+    "ground_truth_context": ["vpn-setup.md"]
+  },
+  {
+    "question": "Will the company cover travel expenses for family members?",
+    "ground_truth": "No, only employee travel expenses are covered.",
+    "ground_truth_context": ["travel-faq.txt"]
+  }
+]
