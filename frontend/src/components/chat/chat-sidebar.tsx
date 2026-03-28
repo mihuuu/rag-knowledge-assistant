@@ -76,7 +76,7 @@ export function ChatSidebar({ initialConversations }: ChatSidebarProps) {
                 isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
               }`}
             >
-              <MessageSquare className="w-4 h-4 shrink-0 text-muted-foreground" />
+              {/* <MessageSquare className="w-4 h-4 shrink-0 text-muted-foreground" /> */}
               <div className="flex-1 min-w-0">
                 <p className="truncate font-medium">{conv.title}</p>
                 <p className="text-xs text-muted-foreground">{timeAgo(conv.updated_at)}</p>

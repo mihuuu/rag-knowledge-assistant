@@ -1,4 +1,6 @@
+import asyncio
 import json
+from functools import partial
 from pathlib import Path
 
 import structlog
@@ -96,7 +98,10 @@ async def run_evaluation(dataset_path: str | None = None) -> dict:
     ]
 
     logger.info("Running Ragas evaluation", num_questions=len(samples))
-    result = evaluate(dataset=eval_dataset, metrics=metrics)
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None, partial(evaluate, dataset=eval_dataset, metrics=metrics)
+    )
 
     # Extract scores
     df = result.to_pandas()
