@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { getDocumentPreviewUrl } from "@/lib/api";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { FileText, FileType, FileCode, File, Download } from "lucide-react";
 import type { Document } from "@/lib/types";
 
@@ -33,15 +35,29 @@ interface DocumentDetailProps {
 
 export function DocumentDetail({ document }: DocumentDetailProps) {
   const [textContent, setTextContent] = useState<string>("");
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     setTextContent("");
-    if (document.file_type === "md" || document.file_type === "txt") {
-      fetch(getDocumentPreviewUrl(document.id))
+    setPdfUrl(null);
+    const previewUrl = getDocumentPreviewUrl(document.id);
+    if (document.file_type === "pdf") {
+      fetch(previewUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          setPdfUrl(url);
+        })
+        .catch(console.error);
+    } else if (document.file_type === "md" || document.file_type === "txt") {
+      fetch(previewUrl)
         .then((res) => res.text())
         .then(setTextContent)
         .catch(console.error);
     }
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
   }, [document]);
 
   const Icon = fileIcons[document.file_type] || File;
@@ -72,12 +88,29 @@ export function DocumentDetail({ document }: DocumentDetailProps) {
       </div>
       <div className="flex-1 overflow-auto p-4">
         {document.file_type === "pdf" ? (
-          <iframe
-            src={previewUrl}
-            className="w-full h-full rounded border min-h-[500px]"
-            title={document.filename}
-          />
-        ) : document.file_type === "md" || document.file_type === "txt" ? (
+          pdfUrl ? (
+            <object
+              data={pdfUrl}
+              type="application/pdf"
+              className="w-full h-full rounded border min-h-[500px]"
+            >
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Unable to display PDF.{" "}
+                <a href={previewUrl} download className="text-primary underline">
+                  Download instead
+                </a>
+              </p>
+            </object>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+              Loading PDF...
+            </div>
+          )
+        ) : document.file_type === "md" ? (
+          <div className="prose prose-sm max-w-none dark:prose-invert bg-muted rounded p-4 h-full overflow-auto">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{textContent}</ReactMarkdown>
+          </div>
+        ) : document.file_type === "txt" ? (
           <pre className="whitespace-pre-wrap text-sm bg-muted rounded p-4 h-full overflow-auto">
             {textContent}
           </pre>
