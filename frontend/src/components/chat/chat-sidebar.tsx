@@ -20,14 +20,10 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-interface ChatSidebarProps {
-  initialConversations: Conversation[];
-}
-
-export function ChatSidebar({ initialConversations }: ChatSidebarProps) {
+export function ChatSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [conversations, setConversations] = useState(initialConversations);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   const refresh = useCallback(async () => {
     try {
@@ -37,6 +33,10 @@ export function ChatSidebar({ initialConversations }: ChatSidebarProps) {
       console.error("Failed to refresh conversations:", err);
     }
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   // Listen for custom event to refresh sidebar after new message
   useEffect(() => {

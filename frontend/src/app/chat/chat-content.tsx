@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +14,8 @@ interface ChatContentProps {
 }
 
 export function ChatContent({ conversationId, initialMessages }: ChatContentProps) {
+  const router = useRouter();
+  const [currentConversationId, setCurrentConversationId] = useState(conversationId);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -49,7 +52,7 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
     try {
       await sendMessage(
         message,
-        conversationId,
+        currentConversationId,
         (token) => {
           setStreamingContent((prev) => {
             const next = prev + token;
@@ -77,9 +80,10 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
           // Notify sidebar to refresh
           window.dispatchEvent(new Event("conversations-updated"));
 
-          // Update URL without re-rendering the page
-          if (!conversationId) {
-            window.history.replaceState(null, "", `/chat/${data.conversation_id}`);
+          // Navigate to the new conversation URL
+          if (!currentConversationId) {
+            setCurrentConversationId(data.conversation_id);
+            router.replace(`/chat/${data.conversation_id}`);
           }
         },
         (error) => {
@@ -106,7 +110,7 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
           {messages.map((msg) => (
             <ChatMessage key={msg.id} role={msg.role} content={msg.content} sources={msg.sources} />
           ))}
-          {isStreaming && streamingContent && (
+          {isStreaming && (
             <ChatMessage
               role="assistant"
               content={streamingContent}

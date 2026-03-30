@@ -31,6 +31,15 @@ export function ChatMessage({ role, content, sources, isStreaming }: ChatMessage
         >
           {isUser ? (
             <p className="whitespace-pre-wrap">{content}</p>
+          ) : isStreaming && !content ? (
+            <div className="flex items-center gap-1.5 text-muted-foreground text-sm py-0.5">
+              <span className="animate-pulse">Thinking</span>
+              <span className="flex gap-0.5">
+                <span className="animate-bounce [animation-delay:0ms]">.</span>
+                <span className="animate-bounce [animation-delay:150ms]">.</span>
+                <span className="animate-bounce [animation-delay:300ms]">.</span>
+              </span>
+            </div>
           ) : (
             <div className="prose prose-sm max-w-none dark:prose-invert">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>

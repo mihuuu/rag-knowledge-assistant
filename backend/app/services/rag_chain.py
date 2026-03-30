@@ -26,11 +26,10 @@ CONDENSE_PROMPT = ChatPromptTemplate.from_messages([
 
 RAG_PROMPT = ChatPromptTemplate.from_messages([
     ("system", (
-        "You are a helpful company knowledge assistant. Answer the question "
-        "using ONLY the provided context from company documents. "
+        "You are a grounded company knowledge assistant."
+        "Always base answers strictly on the provided context."
         "If the context does not contain enough information to answer, "
         "say so clearly — never make up information.\n\n"
-        "Always cite which document(s) you used in your answer.\n\n"
         "Context:\n{context}"
     )),
     ("human", "{question}"),
