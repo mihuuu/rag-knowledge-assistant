@@ -49,7 +49,7 @@ export function FileTree({ documents }: FileTreeProps) {
   };
 
   return (
-    <div className="w-64 border-r bg-muted/30 flex flex-col h-full overflow-auto">
+    <div className="w-72 border-r bg-muted/30 flex flex-col h-full overflow-auto">
       <div className="p-3">
         <h2 className="text-sm font-semibold">Documents</h2>
         <p className="text-xs text-muted-foreground mt-0.5">{documents.length} files</p>
