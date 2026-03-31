@@ -2,10 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { getConversation } from "@/lib/api";
 import { ChatContent } from "../chat-content";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Message } from "@/lib/types";
+
+function MessageSkeleton({ isUser }: { isUser: boolean }) {
+  return (
+    <div className={`flex gap-3 ${isUser ? "justify-end" : ""}`}>
+      {!isUser && <Skeleton className="w-8 h-8 rounded-full shrink-0" />}
+      <div className={`space-y-2 ${isUser ? "items-end" : ""}`}>
+        <Skeleton className={`h-8 rounded-lg ${isUser ? "w-48" : "w-72"}`} />
+      </div>
+      {isUser && <Skeleton className="w-8 h-8 rounded-full shrink-0" />}
+    </div>
+  );
+}
 
 export default function ConversationPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,8 +34,13 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center pt-12 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" />
+      <div className="flex-1 flex flex-col">
+        <div className="max-w-3xl mx-auto p-4 space-y-4 w-full">
+          <MessageSkeleton isUser />
+          <MessageSkeleton isUser={false} />
+          <MessageSkeleton isUser />
+          <MessageSkeleton isUser={false} />
+        </div>
       </div>
     );
   }

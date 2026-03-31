@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Trash2, MessageSquare } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getConversations, deleteConversation } from "@/lib/api";
 import type { Conversation } from "@/lib/types";
 
@@ -24,6 +25,7 @@ export function ChatSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
@@ -31,6 +33,8 @@ export function ChatSidebar() {
       setConversations(convs);
     } catch (err) {
       console.error("Failed to refresh conversations:", err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -66,32 +70,38 @@ export function ChatSidebar() {
         </Button>
       </div>
       <div className="p-2 space-y-1 overflow-y-auto flex-1">
-        {conversations.map((conv) => {
-          const isActive = pathname === `/chat/${conv.id}`;
-          return (
-            <Link
-              key={conv.id}
-              href={`/chat/${conv.id}`}
-              className={`group flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
-                isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
-              }`}
-            >
-              {/* <MessageSquare className="w-4 h-4 shrink-0 text-muted-foreground" /> */}
-              <div className="flex-1 min-w-0">
-                <p className="truncate font-medium">{conv.title}</p>
-                <p className="text-xs text-muted-foreground">{timeAgo(conv.updated_at)}</p>
-              </div>
-              <button
-                onClick={(e) => handleDelete(e, conv.id)}
-                className="shrink-0 opacity-0 group-hover:opacity-100 hover:text-destructive transition-all"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </Link>
-          );
-        })}
-        {conversations.length === 0 && (
+        {loading ? (
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="px-3 py-2 space-y-1.5">
+              <Skeleton className="h-6 w-[100%]" />
+            </div>
+          ))
+        ) : conversations.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No conversations yet</p>
+        ) : (
+          conversations.map((conv) => {
+            const isActive = pathname === `/chat/${conv.id}`;
+            return (
+              <Link
+                key={conv.id}
+                href={`/chat/${conv.id}`}
+                className={`group flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
+                  isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="truncate font-medium">{conv.title}</p>
+                  <p className="text-xs text-muted-foreground">{timeAgo(conv.updated_at)}</p>
+                </div>
+                <button
+                  onClick={(e) => handleDelete(e, conv.id)}
+                  className="shrink-0 opacity-0 group-hover:opacity-100 hover:text-destructive transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </Link>
+            );
+          })
         )}
       </div>
     </div>
