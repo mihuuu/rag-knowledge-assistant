@@ -59,7 +59,14 @@ class DocumentResponse(BaseModel):
 
 class IngestResponse(BaseModel):
     ingested: int
+    skipped: int = 0
     total_chunks: int
+
+
+class DocumentDeleteResponse(BaseModel):
+    id: UUID
+    filename: str
+    chunks_deleted: int
 
 
 # Evaluation

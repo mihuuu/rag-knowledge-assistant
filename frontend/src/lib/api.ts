@@ -35,6 +35,44 @@ export function getDocumentPreviewUrl(id: string): string {
   return `${API_URL}/api/documents/${id}/preview`;
 }
 
+export async function uploadDocument(
+  file: File,
+  category: string
+): Promise<Document> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("category", category);
+  const res = await fetch(`${API_URL}/api/documents/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  return res.json();
+}
+
+export async function updateDocument(
+  id: string,
+  file: File,
+  category?: string
+): Promise<Document> {
+  const form = new FormData();
+  form.append("file", file);
+  if (category) form.append("category", category);
+  const res = await fetch(`${API_URL}/api/documents/${id}`, {
+    method: "PUT",
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+  return res.json();
+}
+
+export async function deleteDocument(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/documents/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+}
+
 // Chat (SSE streaming)
 export async function sendMessage(
   message: string,

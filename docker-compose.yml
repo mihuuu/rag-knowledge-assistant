@@ -38,7 +38,7 @@ services:
       - .env
     volumes:
       - ./backend/app:/app/app
-      - ./data:/app/data:ro
+      - ./data:/app/data
       - ./eval:/app/eval:ro
     depends_on:
       db:
