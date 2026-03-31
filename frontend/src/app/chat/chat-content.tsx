@@ -83,6 +83,7 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
 
           if (!currentConversationId) {
             setCurrentConversationId(data.conversation_id);
+            window.history.replaceState(null, "", `/chat/${data.conversation_id}`);
           }
         },
         (error) => {
