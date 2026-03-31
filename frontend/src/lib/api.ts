@@ -96,6 +96,10 @@ export async function sendMessage(
       } else if (ev.event === "done") {
         onDone(JSON.parse(ev.data));
         ctrl.abort();
+      } else if (ev.event === "error") {
+        const detail = JSON.parse(ev.data).detail ?? "Something went wrong";
+        onError?.(new Error(detail));
+        ctrl.abort();
       }
     },
     onerror(err) {

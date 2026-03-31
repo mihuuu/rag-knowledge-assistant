@@ -3,11 +3,11 @@ from uuid import UUID
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
+from langsmith import trace
 from sse_starlette.sse import EventSourceResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.dependencies import get_redis
 from app.db.session import get_db
 from app.models.schemas import (
     ChatRequest,
@@ -37,8 +37,6 @@ router = APIRouter(tags=["chat"])
 
 @router.post("/chat")
 async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
-    redis = await get_redis()
-
     # Get or create conversation
     if request.conversation_id:
         conversation = await get_conversation_with_messages(db, request.conversation_id)
@@ -57,57 +55,63 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
     history = await get_recent_messages(db, conversation_id, limit=10)
 
     async def event_generator():
-        # Condense question with history
-        standalone_question = await condense_question(request.message, history[:-1])
+        try:
+            with trace(
+                name="chat_turn",
+                run_type="chain",
+                metadata={"conversation_id": str(conversation_id)},
+                inputs={"message": request.message},
+            ) as rt:
+                standalone_question = await condense_question(request.message, history[:-1])
 
-        # Check cache
-        cached = await get_cached_response(redis, standalone_question) if settings.cache_enabled else None
-        if cached:
-            # Stream cached response token by token (simulate streaming)
-            for word in cached["response"].split(" "):
-                yield {"event": "token", "data": json.dumps({"token": word + " "})}
-            yield {"event": "sources", "data": json.dumps(cached["sources"])}
-            # Save assistant message
-            msg = await add_message(
-                db, conversation_id, "assistant", cached["response"], cached["sources"]
-            )
-            yield {
-                "event": "done",
-                "data": json.dumps({
-                    "message_id": str(msg.id),
-                    "conversation_id": str(conversation_id),
-                }),
-            }
-            return
+                # Check semantic cache
+                cached = get_cached_response(standalone_question) if settings.cache_enabled else None
+                if cached:
+                    for word in cached["response"].split(" "):
+                        yield {"event": "token", "data": json.dumps({"token": word + " "})}
+                    yield {"event": "sources", "data": json.dumps(cached["sources"])}
+                    msg = await add_message(
+                        db, conversation_id, "assistant", cached["response"], cached["sources"]
+                    )
+                    yield {
+                        "event": "done",
+                        "data": json.dumps({
+                            "message_id": str(msg.id),
+                            "conversation_id": str(conversation_id),
+                        }),
+                    }
+                    return
 
-        # Retrieve relevant documents
-        docs_with_scores = retrieve_documents(standalone_question)
-        sources = extract_sources(docs_with_scores)
-        context = format_context(docs_with_scores)
+                docs_with_scores = retrieve_documents(standalone_question)
 
-        # Stream LLM response
-        full_response = ""
-        async for token in generate_response(standalone_question, context):
-            full_response += token
-            yield {"event": "token", "data": json.dumps({"token": token})}
+                sources = extract_sources(docs_with_scores)
+                context = format_context(docs_with_scores)
 
-        # Send sources
-        yield {"event": "sources", "data": json.dumps(sources)}
+                # Stream LLM response
+                full_response = ""
+                async for token in generate_response(standalone_question, context):
+                    full_response += token
+                    yield {"event": "token", "data": json.dumps({"token": token})}
 
-        # Cache the response
-        if settings.cache_enabled:
-            await set_cached_response(redis, standalone_question, full_response, sources)
+                yield {"event": "sources", "data": json.dumps(sources)}
 
-        # Save assistant message
-        msg = await add_message(db, conversation_id, "assistant", full_response, sources)
+                # Cache the response
+                if settings.cache_enabled:
+                    set_cached_response(standalone_question, full_response, sources)
 
-        yield {
-            "event": "done",
-            "data": json.dumps({
-                "message_id": str(msg.id),
-                "conversation_id": str(conversation_id),
-            }),
-        }
+                # Save assistant message
+                msg = await add_message(db, conversation_id, "assistant", full_response, sources)
+
+                yield {
+                    "event": "done",
+                    "data": json.dumps({
+                        "message_id": str(msg.id),
+                        "conversation_id": str(conversation_id),
+                    }),
+                }
+        except Exception as e:
+            logger.error("Chat stream error", error=str(e))
+            yield {"event": "error", "data": json.dumps({"detail": str(e)})}
 
     return EventSourceResponse(event_generator())
 

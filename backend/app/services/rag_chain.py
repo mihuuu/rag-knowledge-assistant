@@ -2,6 +2,7 @@ import time
 
 import structlog
 from langchain_cohere import CohereRerank
+from langsmith import traceable
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -55,6 +56,7 @@ def _format_chat_history(messages: list[Message]) -> list:
     return history
 
 
+@traceable(name="condense_question", run_type="chain")
 async def condense_question(question: str, chat_history: list[Message]) -> str:
     if not chat_history:
         return question
@@ -70,6 +72,7 @@ async def condense_question(question: str, chat_history: list[Message]) -> str:
     return condensed
 
 
+@traceable(name="retrieve_documents", run_type="retriever")
 def retrieve_documents(question: str, k: int | None = None) -> list:
     vector_store = get_vector_store()
     k = k or settings.retrieval_k
@@ -138,6 +141,7 @@ def format_context(docs_with_scores: list) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+@traceable(name="generate_response", run_type="chain")
 async def generate_response(question: str, context: str):
     llm = _get_llm(streaming=True)
     chain = RAG_PROMPT | llm

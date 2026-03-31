@@ -29,13 +29,14 @@ class Settings(BaseSettings):
     chunk_overlap: int = 102
     embedding_model: str = "text-embedding-3-small"
     llm_model: str = "gpt-4o-mini"
-    retrieval_k: int = 5
+    retrieval_k: int = 3
     rerank_model: str = "rerank-v3.5"
-    rerank_candidates: int = 20
+    rerank_candidates: int = 15
 
     # Cache
-    cache_enabled: bool = False
+    cache_enabled: bool = True
     cache_ttl: int = 3600  # 1 hour
+    cache_distance_threshold: float = 0.1
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

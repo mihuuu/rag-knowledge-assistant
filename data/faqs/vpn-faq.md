@@ -1,7 +1,7 @@
 
-                                    VPN FAQ
+# VPN FAQ
 
-1. General Questions
+## General Questions
 
 Q: What is a VPN and why do I need it?
 A: A Virtual Private Network (VPN) is a secure way to connect to company systems when you are outside the office. It protects sensitive data by encrypting your internet traffic and ensures compliance with company security standards.
@@ -12,9 +12,8 @@ A: Anytime you are working remotely, accessing internal applications, or connect
 Q: Is the VPN required for all employees?
 A: Yes, all remote employees must use the VPN when connecting to company systems. Exceptions require approval from IT Security.
 
-⸻
 
-2. Access & Setup
+## Access & Setup
 
 Q: How do I install the VPN?
 A: The VPN client can be downloaded from the company IT portal. Installation guides are available for Windows, Mac, iOS, and Android.
@@ -25,9 +24,8 @@ A: Use your company email and password. In most cases, you will also need to ent
 Q: Can I use the VPN on personal devices?
 A: Yes, provided the device meets company security requirements (updated OS, antivirus enabled, no jailbreaking/rooting).
 
-⸻
 
-3. Troubleshooting
+## Troubleshooting
 
 Q: My VPN won’t connect. What should I do?
 A:
@@ -42,9 +40,8 @@ A: This can be due to weak Wi-Fi, firewall restrictions, or ISP issues. Try swit
 Q: I forgot my VPN password. What now?
 A: Reset it via the company’s password reset portal or contact IT Security for assistance.
 
-⸻
 
-4. Usage Guidelines
+## Usage Guidelines
 
 Q: Can I use the VPN for personal browsing?
 A: No. The VPN is strictly for business-related activities. All traffic is monitored for security.
@@ -55,9 +52,8 @@ A: Yes, slightly. Since the VPN encrypts traffic, speeds may be lower than norma
 Q: Can I stay logged in all the time?
 A: No, employees should disconnect from the VPN when not actively working to conserve bandwidth.
 
-⸻
 
-5. Security & Compliance
+## Security & Compliance
 
 Q: Is my data safe on public Wi-Fi if I use the VPN?
 A: Yes, the VPN encrypts all data, making it much harder for attackers to intercept.

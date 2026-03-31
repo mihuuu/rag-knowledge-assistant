@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,10 +13,10 @@ interface ChatContentProps {
 }
 
 export function ChatContent({ conversationId, initialMessages }: ChatContentProps) {
-  const router = useRouter();
   const [currentConversationId, setCurrentConversationId] = useState(conversationId);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState("");
   const [streamingSources, setStreamingSources] = useState<Source[] | null>(null);
   const streamingSourcesRef = useRef<Source[] | null>(null);
@@ -33,8 +32,9 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
   }, [messages, streamingContent]);
 
   useEffect(() => {
+    setCurrentConversationId(conversationId);
     setMessages(initialMessages);
-  }, [initialMessages]);
+  }, [conversationId, initialMessages]);
 
   const handleSend = async (message: string) => {
     const userMsg: Message = {
@@ -48,6 +48,7 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
     setIsStreaming(true);
     setStreamingContent("");
     setStreamingSources(null);
+    setError(null);
 
     try {
       await sendMessage(
@@ -80,19 +81,19 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
           // Notify sidebar to refresh
           window.dispatchEvent(new Event("conversations-updated"));
 
-          // Navigate to the new conversation URL
           if (!currentConversationId) {
             setCurrentConversationId(data.conversation_id);
-            router.replace(`/chat/${data.conversation_id}`);
           }
         },
         (error) => {
           console.error("Stream error:", error);
+          setError(error.message);
           setIsStreaming(false);
         }
       );
     } catch (err) {
       console.error("Send error:", err);
+      setError(err instanceof Error ? err.message : "Something went wrong");
       setIsStreaming(false);
     }
   };
@@ -117,6 +118,11 @@ export function ChatContent({ conversationId, initialMessages }: ChatContentProp
               sources={streamingSources}
               isStreaming
             />
+          )}
+          {error && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {error}
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
