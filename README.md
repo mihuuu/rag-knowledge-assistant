@@ -2,6 +2,10 @@
 
 A full-stack **RAG** (Retrieval-Augmented Generation) application that answers questions based on company documents with source citations.
 
+![Chat interface](screenshots/chat.jpg)
+
+![Document preview](screenshots/doc.jpg)
+
 ## Architecture
 
 - **Backend**: LangChain + FastAPI
