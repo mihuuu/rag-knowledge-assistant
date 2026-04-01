@@ -46,7 +46,7 @@ async def run_evaluation(dataset_path: str | None = None) -> dict:
         ground_truth = item["ground_truth"]
 
         # Run RAG pipeline (non-streaming)
-        docs_with_scores = retrieve_documents(question)
+        docs_with_scores = await retrieve_documents(question)
         context = format_context(docs_with_scores)
         sources = extract_sources(docs_with_scores)
 

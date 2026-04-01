@@ -8,7 +8,7 @@ from starlette.requests import Request
 
 from app.api import chat, documents, evaluate
 from app.api.middleware import RequestLoggingMiddleware
-from app.core.dependencies import close_redis, get_redis
+from app.core.dependencies import close_pg_engine, close_redis, get_redis, init_vector_store_table
 from app.core.logging import setup_logging
 from app.db.init_db import init_db
 
@@ -20,9 +20,11 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI):
     logger.info("Starting up RAG knowledge assistant...")
     await init_db()
+    await init_vector_store_table()
     logger.info("Database initialized")
     yield
     await close_redis()
+    await close_pg_engine()
     logger.info("Shut down complete")
 
 

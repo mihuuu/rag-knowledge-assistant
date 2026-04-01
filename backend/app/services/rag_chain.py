@@ -72,19 +72,19 @@ async def condense_question(question: str, chat_history: list[Message]) -> str:
 
 
 @traceable(name="retrieve_documents", run_type="retriever")
-def retrieve_documents(question: str, k: int | None = None) -> list:
-    vector_store = get_vector_store()
+async def retrieve_documents(question: str, k: int | None = None) -> list:
+    vector_store = await get_vector_store()
     k = k or settings.retrieval_k
 
     if not settings.cohere_api_key:
         logger.warning("No Cohere API key set, skipping rerank")
-        docs = vector_store.similarity_search_with_score(question, k=k)
+        docs = await vector_store.asimilarity_search_with_score(question, k=k)
         logger.info("Retrieved docs", question=question[:50], count=len(docs))
         return docs
 
     # Over-fetch candidates for reranking
     n = settings.rerank_candidates
-    candidates = vector_store.similarity_search_with_score(
+    candidates = await vector_store.asimilarity_search_with_score(
         question, k=n
     )
     logger.info("Retrieved candidates", question=question[:50], count=len(candidates))

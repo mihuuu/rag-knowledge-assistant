@@ -82,7 +82,7 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
                     }
                     return
 
-                docs_with_scores = retrieve_documents(standalone_question)
+                docs_with_scores = await retrieve_documents(standalone_question)
 
                 sources = extract_sources(docs_with_scores)
                 context = format_context(docs_with_scores)

@@ -14,12 +14,10 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.dependencies import get_embeddings, get_vector_store
+from app.core.dependencies import TABLE_NAME, get_vector_store
 from app.models.database import Document
 
 logger = structlog.get_logger()
-
-COLLECTION_NAME = "company_docs"
 
 
 def _compute_file_hash(file_path: str) -> str:
@@ -63,14 +61,11 @@ def _get_text_splitter(category: str) -> RecursiveCharacterTextSplitter:
 
 async def delete_chunks_for_document(db: AsyncSession, document_id: str) -> int:
     result = await db.execute(
-        text("""
-            DELETE FROM langchain_pg_embedding
-            WHERE cmetadata->>'document_id' = :doc_id
-              AND collection_id = (
-                  SELECT uuid FROM langchain_pg_collection WHERE name = :collection
-              )
+        text(f"""
+            DELETE FROM {TABLE_NAME}
+            WHERE langchain_metadata->>'document_id' = :doc_id
         """),
-        {"doc_id": document_id, "collection": COLLECTION_NAME},
+        {"doc_id": document_id},
     )
     count = result.rowcount
     logger.info("Deleted chunks", document_id=document_id, chunks_deleted=count)
@@ -85,7 +80,7 @@ async def ingest_single_document(
     doc_id: uuid.UUID | None = None,
 ) -> Document:
     doc_id = doc_id or uuid.uuid4()
-    vector_store = get_vector_store()
+    vector_store = await get_vector_store()
 
     raw_docs = _load_file(file_path)
     if not raw_docs:
@@ -107,7 +102,7 @@ async def ingest_single_document(
     logger.info("Chunked document", filename=filename, chunks=chunk_count)
 
     if chunks:
-        vector_store.add_documents(chunks)
+        await vector_store.aadd_documents(chunks)
 
     file_size = os.path.getsize(file_path)
     doc_record = Document(
@@ -125,7 +120,7 @@ async def ingest_single_document(
 
 async def ingest_documents(db: AsyncSession, data_dir: str | None = None) -> dict:
     data_dir = data_dir or settings.data_dir
-    vector_store = get_vector_store()
+    vector_store = await get_vector_store()
 
     ingested = 0
     skipped = 0
@@ -192,7 +187,7 @@ async def ingest_documents(db: AsyncSession, data_dir: str | None = None) -> dic
 
             # Embed and store in PGVector
             if chunks:
-                vector_store.add_documents(chunks)
+                await vector_store.aadd_documents(chunks)
 
             content_hash = _compute_file_hash(file_path)
 
