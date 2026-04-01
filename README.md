@@ -24,9 +24,10 @@ A full-stack **RAG** (Retrieval-Augmented Generation) application that answers q
 - Category organization (FAQs, guides, policies, etc.)
 
 ### Retrieval
+- HNSW vector indexing for faster search
 - Cohere reranking for improved relevance
-- Redis semantic caching for faster repeated queries
-- Multi-model routing for different tasks
+- Redis semantic caching for repeated queries
+- Multi-model selection for different tasks
 
 ### Generation
 - Grounded responses with source citations
