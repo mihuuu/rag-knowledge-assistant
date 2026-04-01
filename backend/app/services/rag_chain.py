@@ -7,10 +7,10 @@ from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
 
 from app.core.config import settings
 from app.core.dependencies import get_vector_store
+from app.core.model_factory import get_chat_model
 from app.models.database import Message
 
 logger = structlog.get_logger()
@@ -26,24 +26,23 @@ CONDENSE_PROMPT = ChatPromptTemplate.from_messages([
 ])
 
 RAG_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", (
-        "You are a grounded company knowledge assistant."
-        "Always base answers strictly on the provided context."
+    ("system",
+        "You are a grounded company knowledge assistant. "
+        "Always base answers strictly on the provided context. "
         "If the context does not contain enough information to answer, "
-        "say so clearly — never make up information.\n\n"
-        "Context:\n{context}"
-    )),
-    ("human", "{question}"),
+        "say so clearly — never make up information. "
+        "Be concise and direct. No titles, headings, or preamble."
+    ),
+    ("human", "Context:\n{context}\n\nQuestion: {question}"),
 ])
 
 
-def _get_llm(streaming: bool = False) -> ChatOpenAI:
-    return ChatOpenAI(
-        model=settings.llm_model,
-        temperature=0,
-        streaming=streaming,
-        api_key=settings.openai_api_key,
-    )
+def _get_condense_llm():
+    return get_chat_model(settings.get_condense_model(), streaming=False)
+
+
+def _get_generation_llm():
+    return get_chat_model(settings.get_generation_model(), streaming=True)
 
 
 def _format_chat_history(messages: list[Message]) -> list:
@@ -61,7 +60,7 @@ async def condense_question(question: str, chat_history: list[Message]) -> str:
     if not chat_history:
         return question
 
-    llm = _get_llm(streaming=False)
+    llm = _get_condense_llm()
     chain = CONDENSE_PROMPT | llm | StrOutputParser()
 
     condensed = await chain.ainvoke({
@@ -143,7 +142,7 @@ def format_context(docs_with_scores: list) -> str:
 
 @traceable(name="generate_response", run_type="chain")
 async def generate_response(question: str, context: str):
-    llm = _get_llm(streaming=True)
+    llm = _get_generation_llm()
     chain = RAG_PROMPT | llm
 
     async for chunk in chain.astream({"question": question, "context": context}):

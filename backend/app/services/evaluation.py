@@ -12,24 +12,20 @@ from ragas.metrics import (
     AnswerRelevancy,
     Faithfulness,
 )
-from langchain_openai import ChatOpenAI
-
 from app.core.config import settings
+from app.core.model_factory import get_chat_model
 from app.services.rag_chain import (
     retrieve_documents,
     format_context,
     extract_sources,
+    RAG_PROMPT,
 )
 
 logger = structlog.get_logger()
 
 
 def _get_eval_llm():
-    return ChatOpenAI(
-        model=settings.llm_model,
-        temperature=0,
-        api_key=settings.openai_api_key,
-    )
+    return get_chat_model(settings.get_eval_model())
 
 
 async def run_evaluation(dataset_path: str | None = None) -> dict:
@@ -55,20 +51,7 @@ async def run_evaluation(dataset_path: str | None = None) -> dict:
         sources = extract_sources(docs_with_scores)
 
         # Get answer from LLM
-        from langchain_core.prompts import ChatPromptTemplate
-
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", (
-                "You are a grounded company knowledge assistant."
-                "Always base answers strictly on the provided context."
-                "If the context does not contain enough information to answer, "
-                "say so clearly — never make up information."
-                "Respond concisely and clearly\n\n"
-                "Context:\n{context}"
-            )),
-            ("human", "{question}"),
-        ])
-        chain = prompt | llm
+        chain = RAG_PROMPT | llm
         response = await chain.ainvoke({"question": question, "context": context})
         answer = response.content
 

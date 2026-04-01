@@ -9,6 +9,7 @@ A full-stack **RAG** (Retrieval-Augmented Generation) application that answers q
 ## Architecture
 
 - **Backend**: LangChain + FastAPI
+- **LLM Providers**: OpenAI + Anthropic
 - **Storage**: PostgreSQL/PGVector + Redis
 - **Frontend**: Next.js + TypeScript + Shadcn UI
 - **Observability**: LangSmith tracing + structured logging + Ragas evaluation
@@ -16,21 +17,21 @@ A full-stack **RAG** (Retrieval-Augmented Generation) application that answers q
 
 ## Features
 
-### Documents
+### Ingestion
 - Multi-format support: PDF, DOCX, Markdown, and plain text
-- Bulk ingestion from organized directories
+- Bulk ingestion from data directories
 - Incremental document updates
 - Category organization (FAQs, guides, policies, etc.)
 
 ### Retrieval
 - Cohere reranking for improved relevance
 - Redis semantic caching for faster repeated queries
-- Question condensing for multi-turn search
+- Multi-model routing for different tasks
 
-### Chat
+### Generation
 - Grounded responses with source citations
 - Streaming responses via SSE
-- Multi-turn conversation history
+- Multi-turn conversation history with question condensing
 
 
 ## Quick Start
@@ -38,31 +39,37 @@ A full-stack **RAG** (Retrieval-Augmented Generation) application that answers q
 1. **Copy environment variables**:
    ```bash
    cp .env.example .env
-   # Edit .env with your OPENAI_API_KEY and optionally LANGSMITH_API_KEY, COHERE_API_KEY
+   # Edit .env with your OPENAI_API_KEY, ANTHROPIC_API_KEY, and optionally LANGSMITH_API_KEY, COHERE_API_KEY
    ```
 
-2. **Start all services**:
+2. **Start backend**:
    ```bash
    docker compose up --build
    ```
-   This starts PostgreSQL, Redis, the backend API, and the frontend.
+   This starts PostgreSQL, Redis, and the backend API.
 
-3. **Ingest documents**:
+3. **Start frontend** (in a separate terminal):
+   ```bash
+   cd frontend && npm install && npm run dev
+   ```
+
+4. **Ingest documents**:
    ```bash
    curl -X POST http://localhost:8000/api/documents/ingest
    ```
 
-4. **Open the app**: http://localhost:3000
+5. **Open the app**: http://localhost:3000
 
 ## Services
 
 | Service    | URL                   | Description              |
 |------------|-----------------------|--------------------------|
-| Frontend   | http://localhost:3000  | Chat & document viewer   |
+| Frontend   | http://localhost:3000  | Next.js dev server       |
 | Backend    | http://localhost:8000  | FastAPI REST + SSE       |
 | PostgreSQL | localhost:5432        | PGVector storage         |
 | Redis      | localhost:6379        | Semantic cache           |
 | Redis UI   | http://localhost:8001  | Redis Stack browser      |
+
 
 ## Evaluation
 

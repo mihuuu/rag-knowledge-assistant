@@ -62,11 +62,15 @@ export function ChatSidebar() {
   return (
     <div className="w-72 max-w-72 border-r bg-muted/30 flex flex-col h-full">
       <div className="p-3 border-b">
-        <Button asChild className="w-full" variant="outline">
-          <Link href="/chat">
-            <Plus className="w-4 h-4 mr-2" />
-            New Chat
-          </Link>
+        <Button
+          className="w-full"
+          variant="outline"
+          onClick={() => {
+            router.push("/chat")
+          }}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Chat
         </Button>
       </div>
       <div className="p-2 space-y-1 overflow-y-auto flex-1">

@@ -1,18 +1,16 @@
 import redis.asyncio as aioredis
-from langchain_openai import OpenAIEmbeddings
+from langchain_core.embeddings import Embeddings
 from langchain_postgres import PGVector
 
 from app.core.config import settings
+from app.core.model_factory import get_embedding_model
 
 _redis_client: aioredis.Redis | None = None
 _vector_store: PGVector | None = None
 
 
-def get_embeddings() -> OpenAIEmbeddings:
-    return OpenAIEmbeddings(
-        model=settings.embedding_model,
-        openai_api_key=settings.openai_api_key,
-    )
+def get_embeddings() -> Embeddings:
+    return get_embedding_model(settings.embedding_model)
 
 
 async def get_redis() -> aioredis.Redis:
